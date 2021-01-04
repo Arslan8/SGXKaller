@@ -1,0 +1,235 @@
+make -C ./libsgx_tsgxfuzz/
+make[1]: Entering directory '/home/arslan/Documents/sgxsdk/sgxsdk/SampleCode/libFuzzSGX/libsgx_tsgxfuzz'
+cc -c -g libsgx_tsgxfuzz.c -o libsgx_tsgxfuzz.o -I /home/arslan/sgxsdk3/sgxsdk/include
+libsgx_tsgxfuzz.c: In function ‘libsfuzz_ocall_getenv’:
+libsgx_tsgxfuzz.c:105:21: warning: implicit declaration of function ‘memcpy_s’; did you mean ‘memcpy’? [-Wimplicit-function-declaration]
+                 if (memcpy_s(__tmp, ocalloc_size, name, _len_name)) {
+                     ^~~~~~~~
+                     memcpy
+libsgx_tsgxfuzz.c: In function ‘readlink’:
+libsgx_tsgxfuzz.c:180:9: warning: implicit declaration of function ‘libsfuzz_libsfuzz_ocall_readlink’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_libsfuzz_ocall_readlink(&ret_val, pathname, buf, bufsiz);
+         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c:182:24: warning: format ‘%d’ expects argument of type ‘int’, but argument 4 has type ‘size_t {aka long unsigned int}’ [-Wformat=]
+   snprintf(tbuf,100, "%d", ret_val);
+                       ~^
+                       %ld
+libsgx_tsgxfuzz.c: In function ‘getenv’:
+libsgx_tsgxfuzz.c:195:24: warning: format ‘%d’ expects argument of type ‘int’, but argument 4 has type ‘char *’ [-Wformat=]
+   snprintf(tbuf,100, "%d", ret_val);
+                       ~^
+                       %s
+libsgx_tsgxfuzz.c: In function ‘pthread_self’:
+libsgx_tsgxfuzz.c:210:9: warning: implicit declaration of function ‘libsfuzz_ocall_pthread_self’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_pthread_self(&ret_val);
+         ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c:212:24: warning: format ‘%d’ expects argument of type ‘int’, but argument 4 has type ‘pthread_t {aka long unsigned int}’ [-Wformat=]
+   snprintf(tbuf,100, "%d", ret_val);
+                       ~^
+                       %ld
+libsgx_tsgxfuzz.c: In function ‘waitpid’:
+libsgx_tsgxfuzz.c:252:2: warning: implicit declaration of function ‘libsfuzz_ocall_waitpid’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  libsfuzz_ocall_waitpid(&ret_val,pid,stat_loc,options);
+  ^~~~~~~~~~~~~~~~~~~~~~
+  libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘write’:
+libsgx_tsgxfuzz.c:265:2: warning: implicit declaration of function ‘libsfuzz_ocall_write’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  libsfuzz_ocall_write(&ret_val, __fd, __buf, __n);
+  ^~~~~~~~~~~~~~~~~~~~
+  libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c:267:24: warning: format ‘%d’ expects argument of type ‘int’, but argument 4 has type ‘ssize_t {aka long int}’ [-Wformat=]
+   snprintf(tbuf,100, "%d", ret_val);
+                       ~^
+                       %ld
+libsgx_tsgxfuzz.c: In function ‘read’:
+libsgx_tsgxfuzz.c:278:2: warning: implicit declaration of function ‘libsfuzz_ocall_read’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  libsfuzz_ocall_read(&ret_val, __fd, __buf, __nbytes);
+  ^~~~~~~~~~~~~~~~~~~
+  libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c:280:24: warning: format ‘%d’ expects argument of type ‘int’, but argument 4 has type ‘ssize_t {aka long int}’ [-Wformat=]
+   snprintf(tbuf,100, "%d", ret_val);
+                       ~^
+                       %ld
+libsgx_tsgxfuzz.c: In function ‘__fxstat’:
+libsgx_tsgxfuzz.c:333:2: warning: implicit declaration of function ‘libsfuzz_ocall_fxstat’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  libsfuzz_ocall_fxstat(&ret_val,vers,fd,buf);
+  ^~~~~~~~~~~~~~~~~~~~~
+  libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘sigaltstack’:
+libsgx_tsgxfuzz.c:346:9: warning: implicit declaration of function ‘libsfuzz_ocall_sigaltstack’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_sigaltstack(&ret_val,(unsigned long long)ss, (unsigned long long)old_ss);
+         ^~~~~~~~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘getrlimit’:
+libsgx_tsgxfuzz.c:359:10: warning: implicit declaration of function ‘libsfuzz_ocall_getrlimit’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat =  libsfuzz_ocall_getrlimit(&ret_val, resource, rlim);
+          ^~~~~~~~~~~~~~~~~~~~~~~~
+          libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘setrlimit’:
+libsgx_tsgxfuzz.c:372:9: warning: implicit declaration of function ‘libsfuzz_ocall_setrlimit’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_setrlimit(&ret_val, resource, rlim);
+         ^~~~~~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘pthread_attr_init’:
+libsgx_tsgxfuzz.c:385:9: warning: implicit declaration of function ‘libsfuzz_ocall_pthread_attr_init’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_pthread_attr_init(&ret_val, attr);
+         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘pthread_attr_destroy’:
+libsgx_tsgxfuzz.c:397:9: warning: implicit declaration of function ‘libsfuzz_ocall_pthread_attr_destroy’; did you mean ‘pthread_attr_destroy’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_pthread_attr_destroy(&ret_val, attr);
+         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         pthread_attr_destroy
+libsgx_tsgxfuzz.c: In function ‘__snprintf_chk’:
+libsgx_tsgxfuzz.c:417:9: warning: implicit declaration of function ‘libsfuzz_ocall_snprintf_chk’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_snprintf_chk(&ret_val, __s, __n, __flag, __slen, __format);
+         ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘dlsym’:
+libsgx_tsgxfuzz.c:446:9: warning: implicit declaration of function ‘libsfuzz_ocall_dlsym’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_dlsym(&ret_val, (unsigned long long) handle, symbol);
+         ^~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c:449:25: warning: format ‘%d’ expects argument of type ‘int’, but argument 4 has type ‘void *’ [-Wformat=]
+   snprintf(tbuf, 100, "%d", ret_val);
+                        ~^
+                        %p
+libsgx_tsgxfuzz.c: In function ‘open’:
+libsgx_tsgxfuzz.c:474:9: warning: implicit declaration of function ‘libsfuzz_ocall_open’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_open(&ret_val, pathname, flags);
+         ^~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘pthread_getattr_np’:
+libsgx_tsgxfuzz.c:486:8: warning: implicit declaration of function ‘libsfuzz_ocall_pthread_getattr_np’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat= libsfuzz_ocall_pthread_getattr_np(&ret_val,thread, attr);
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘pthread_getspecific’:
+libsgx_tsgxfuzz.c:498:9: warning: implicit declaration of function ‘libsfuzz_ocall_pthread_getspecific’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_pthread_getspecific(&ret_val, key);
+         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c:500:25: warning: format ‘%d’ expects argument of type ‘int’, but argument 4 has type ‘void *’ [-Wformat=]
+   snprintf(tbuf, 100, "%d", ret_val);
+                        ~^
+                        %p
+libsgx_tsgxfuzz.c: In function ‘pthread_setspecific’:
+libsgx_tsgxfuzz.c:510:9: warning: implicit declaration of function ‘libsfuzz_ocall_pthread_setspecific’; did you mean ‘pthread_setspecific’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_pthread_setspecific(&ret_val,key,value);
+         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         pthread_setspecific
+libsgx_tsgxfuzz.c: In function ‘close’:
+libsgx_tsgxfuzz.c:523:9: warning: implicit declaration of function ‘libsfuzz_ocall_close’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_close(&ret_val, fd);
+         ^~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘pthread_key_create’:
+libsgx_tsgxfuzz.c:535:9: warning: implicit declaration of function ‘libsfuzz_ocall_pthread_key_create’; did you mean ‘pthread_key_create’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_pthread_key_create(&ret_val, key, NULL);
+         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         pthread_key_create
+libsgx_tsgxfuzz.c: In function ‘getrusage’:
+libsgx_tsgxfuzz.c:547:9: warning: implicit declaration of function ‘libsfuzz_ocall_getrusage’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_getrusage(&ret_val, who, usage);
+         ^~~~~~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘sched_yield’:
+libsgx_tsgxfuzz.c:559:9: warning: implicit declaration of function ‘libsfuzz_ocall_sched_yield’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_sched_yield(&ret_val);
+         ^~~~~~~~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘isatty’:
+libsgx_tsgxfuzz.c:580:9: warning: implicit declaration of function ‘libsfuzz_ocall_isatty’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_isatty(&ret_val, fd);
+         ^~~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘pipe’:
+libsgx_tsgxfuzz.c:592:9: warning: implicit declaration of function ‘libsfuzz_ocall_pipe’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_pipe(&ret_val, pipefd);
+         ^~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘usleep’:
+libsgx_tsgxfuzz.c:604:9: warning: implicit declaration of function ‘libsfuzz_ocall_usleep’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_usleep(&ret_val, usec);
+         ^~~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘sleep’:
+libsgx_tsgxfuzz.c:617:9: warning: implicit declaration of function ‘libsfuzz_ocall_sleep’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_sleep(&ret_val, seconds);
+         ^~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘execv’:
+libsgx_tsgxfuzz.c:647:9: warning: implicit declaration of function ‘libsfuzz_ocall_execv’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_execv(&ret_val, path, 0, argv1, argv2, argv3);
+         ^~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘shm_open’:
+libsgx_tsgxfuzz.c:660:9: warning: implicit declaration of function ‘libsfuzz_ocall_shm_open’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_shm_open(&ret_val, name,oflag,mode);
+         ^~~~~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘shm_unlink’:
+libsgx_tsgxfuzz.c:673:9: warning: implicit declaration of function ‘libsfuzz_ocall_shm_unlink’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_shm_unlink(&ret_val, name);
+         ^~~~~~~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c: In function ‘getuid’:
+libsgx_tsgxfuzz.c:685:9: warning: implicit declaration of function ‘libsfuzz_ocall_getuid’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_getuid(&ret_val);
+         ^~~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c:687:25: warning: format ‘%d’ expects argument of type ‘int’, but argument 4 has type ‘long long unsigned int’ [-Wformat=]
+   snprintf(tbuf, 100, "%d", ret_val);
+                        ~^
+                        %lld
+libsgx_tsgxfuzz.c: In function ‘sysconf’:
+libsgx_tsgxfuzz.c:698:9: warning: implicit declaration of function ‘libsfuzz_ocall_sysconf’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_sysconf(&ret_val, name);
+         ^~~~~~~~~~~~~~~~~~~~~~
+         libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c:700:25: warning: format ‘%d’ expects argument of type ‘int’, but argument 4 has type ‘long int’ [-Wformat=]
+   snprintf(tbuf, 100, "%d", ret_val);
+                        ~^
+                        %ld
+libsgx_tsgxfuzz.c: In function ‘pthread_attr_setstacksize’:
+libsgx_tsgxfuzz.c:710:9: warning: implicit declaration of function ‘libsfuzz_ocall_pthread_attr_setstacksize’; did you mean ‘pthread_attr_setstacksize’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_pthread_attr_setstacksize(&ret_val, attr, stacksize);
+         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         pthread_attr_setstacksize
+libsgx_tsgxfuzz.c: In function ‘pthread_attr_getstacksize’:
+libsgx_tsgxfuzz.c:722:9: warning: implicit declaration of function ‘libsfuzz_ocall_pthread_attr_getstacksize’; did you mean ‘pthread_attr_getstacksize’? [-Wimplicit-function-declaration]
+  stat = libsfuzz_ocall_pthread_attr_getstacksize(&ret_val, (pthread_attr_t *) attr,stacksize);
+         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         pthread_attr_getstacksize
+libsgx_tsgxfuzz.c: In function ‘_exit’:
+libsgx_tsgxfuzz.c:734:16: warning: implicit declaration of function ‘libsfuzz_ocall_exit’; did you mean ‘libsfuzz_ocall_getenv’? [-Wimplicit-function-declaration]
+         stat = libsfuzz_ocall_exit(status);
+                ^~~~~~~~~~~~~~~~~~~
+                libsfuzz_ocall_getenv
+libsgx_tsgxfuzz.c:739:1: warning: ‘noreturn’ function does return
+ }
+ ^
+ar rcs libsgx_tsgxfuzz.a libsgx_tsgxfuzz.o
+make[1]: Leaving directory '/home/arslan/Documents/sgxsdk/sgxsdk/SampleCode/libFuzzSGX/libsgx_tsgxfuzz'
+make -C ./libsgx_usgxfuzz/
+make[1]: Entering directory '/home/arslan/Documents/sgxsdk/sgxsdk/SampleCode/libFuzzSGX/libsgx_usgxfuzz'
+cc -c -g libsgx_usgxfuzz.c -o libsgx_usgxfuzz.o
+libsgx_usgxfuzz.c: In function ‘libsfuzz_ocall_syslog_chk’:
+libsgx_usgxfuzz.c:78:9: warning: format not a string literal and no format arguments [-Wformat-security]
+         syslog(priority,format);
+         ^~~~~~
+libsgx_usgxfuzz.c: In function ‘libsfuzz_ocall_pthread_getattr_np’:
+libsgx_usgxfuzz.c:114:16: warning: implicit declaration of function ‘pthread_getattr_np’; did you mean ‘pthread_attr_init’? [-Wimplicit-function-declaration]
+         return pthread_getattr_np(thread, attr);
+                ^~~~~~~~~~~~~~~~~~
+                pthread_attr_init
+libsgx_usgxfuzz.c: In function ‘libsfuzz_ocall_getenv’:
+libsgx_usgxfuzz.c:163:9: warning: return discards ‘volatile’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  return ret_val;
+         ^~~~~~~
+ar rcs libsgx_usgxfuzz.a libsgx_usgxfuzz.o
+make[1]: Leaving directory '/home/arslan/Documents/sgxsdk/sgxsdk/SampleCode/libFuzzSGX/libsgx_usgxfuzz'
+cp ./libsgx_tsgxfuzz/libsgx_tsgxfuzz.a .
+cp ./libsgx_usgxfuzz/libsgx_usgxfuzz.a .
