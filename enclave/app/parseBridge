@@ -16,6 +16,7 @@ symExecTime = 0
 parseClusterTime = 0
 inferModelTime = 0
 mainLoopStart = 0
+totalExecs = 0
 mystdout = StringIO()
 x={}
 m={}
@@ -32,14 +33,16 @@ structs={}
 aliases={}
 funcWithRet = []
 isEnum = False
-current = open("temp","w")
-results = open("./results", "w")
+current = None
+results = None
+seedTestcase = None 
 ec = {}
 targetFuncs= []
 import subprocess
 bestScore = 0
 baselineScore = 0
 bestIndex = 0
+testcaseDir = ""
 check = "if (ret != SGX_SUCCESS)\n	printf(\"Failure Code: %d\",ret); \n"
 import signal
 import sys
@@ -77,8 +80,9 @@ def signal_handler(sig, frame):
     datetime.timedelta(hours=x.tm_hour,minutes=x.tm_min,seconds=x.tm_sec).total_seconds()
     timeElapsed = time.time() - startTime
     fuzzTime = time.time() - mainLoopStart
-    results.write("Througput:" + str(caseIndex/timeElapsed) +"\n")
-    results.write("Throughtput Fuzzer: " + str(caseIndex/fuzzTime) + "\n")
+    results.write("Total Execs: " + str(totalExecs) + "\n")
+    results.write("Througput:" + str(totalExecs/timeElapsed) +"\n")
+    results.write("Throughtput Fuzzer: " + str(totalExecs/fuzzTime) + "\n")
     results.write("Parse Time: "+ str(parseTimeStart) +"\n")
     results.write("Total time elapsed: " + str(timeElapsed) +"\n")
     results.write("Symbolic Execution Time: " + str(symExecTime) +"\n")
@@ -327,11 +331,12 @@ def scPrint(obj):
 def stdioPrint(obj):
     old = sys.stdout 
     sys.stdout= sys.__stdout__
-    #print (obj)
+    print (obj)
     sys.stdout= old
 
 def fuzz(snip, func):
     global x
+    global seedTestcase
     typeName = snip.split(" ")
     type, id = typeName[:-1],typeName[-1]
     size = id.split('[');
@@ -430,15 +435,12 @@ def fuzz(snip, func):
                     pick = randrange(solns -1)
                 #embed()
                 BA = x[func]["args"][argn][str(pick)]
-                idx =0 
+                idx =0
+
+                scPrint("fgets(temp,"+ str(len(x[func]["args"][argn][str(pick)]))+ ", stdin);")
                 for byte in BA:
-                    scPrint("temp["+str(idx)+"] = "+ str(byte) + ";")
-                    bit = randrange(8)
-                    x[func]["args"][argn][str(pick)][idx] = 0xFF & (x[func]["args"][argn][str(pick)][idx] ^ (1 << bit))
-                    idx +=1 
-                stdioPrint(x[func]["args"][argn][str(pick)])
-
-
+                    seedTestcase.write(struct.pack('B',byte))
+                    idx+=1
             else:
                 scPrint("memset(&" + ast[1].replace(";","") +",0,sizeof("+ ast[0]+ "));")
             snip = ""
@@ -459,16 +461,10 @@ def fuzz(snip, func):
                 #embed()
                 BA = x[func]["args"][argn][str(pick)]
                 idx =0
+                scPrint("fgets(temp,"+ str(len(BA))+ ", stdin);")
                 for byte in BA:
-                    scPrint("temp["+str(idx)+"] = "+ str(byte) + ";")
-                    bit = randrange(8)
-                    stdioPrint(len(x[func]["args"][argn][str(pick)]))
-                    stdioPrint(idx)
-                    stdioPrint(x[func]["args"][argn][str(pick)])
-                    stdioPrint(x[func]["args"][argn][str(pick)][idx])
-                    x[func]["args"][argn][str(pick)][idx] = 0xFF & (x[func]["args"][argn][str(pick)][idx] ^ (1 << bit))
+                    seedTestcase.write(struct.pack('B',byte))
                     idx+=1
-                stdioPrint(x[func]["args"][argn][str(pick)])
 
         else:
             snip = type + " " + id + delim[2] + ";"
@@ -628,7 +624,7 @@ def writeClusters():
             for func in perm:
                 writeFunctionWrapper(func)
                 current.flush()
-            if (subprocess.call(["timeout", "1s", "./runperm.sh", filename]) == 0):
+            if (subprocess.call(["timeout", "1s", "./runperm.sh", filename, testcaseDir]) == 0):
                 clu[gstate][i].insert(0,"GOOD")
             else:
                 clu[gstate][i].insert(0,"BAD")
@@ -665,7 +661,10 @@ def increasePool():
 baselineScore = 0
 
 def getScore():
-    fname = "./out/fuzz_trace_best"
+    global testcaseDir
+    global totalExecs
+    fname = testcaseDir + "/out/fuzz_trace_best"
+    stat = testcaseDir + "/out/fuzzer_stats"
     numBlocks = 0
     numSet = 0
     blockHit = 0
@@ -680,6 +679,12 @@ def getScore():
                     if (((num >> (byte * 8)) & 0xFF) > 0):
                         blockHit += 1
                 numBlocks += 4
+
+        with open(stat) as f:
+            for line in f:
+                line = line.rstrip()  # remove '\n' at end of line
+                if "execs_done" in line:
+                    totalExecs += int(line.split(":")[-1])
         return blockHit
     else:
         stdioPrint("The testcase failed")
@@ -687,6 +692,7 @@ def getScore():
 
 def mainLoop():
     global current
+    global startTime
     global currPool
     global baselineScore
     global bestIndex
@@ -696,20 +702,27 @@ def mainLoop():
     global funcWritten
     global caseIndex
     global mainLoopStart
+    global testcaseDir
+    global seedTestcase
     mainLoopStart = time.time()
     currPool = set()
     targetSize = len(targetFuncs)
     caseIndex = 0
     weGood = False
     for func in targetFuncs:
-        filename = "./baseline"
+        filename = "baseline"
+        testcaseDir = "./work/" + filename
+        seedFile = "./work/" + filename + "/in/1"
+        filename = "./work/" + filename +"/" +filename
         funcWritten = 0
+        subprocess.call(["timeout", "10s", "./setupHarness.sh", testcaseDir])
         current = open(filename, 'w+')
+        seedTestcase = open(seedFile, 'wb+')
         writeFunctionWrapper(func)
         scPrint(check)
         current.flush()
-        subprocess.call(["timeout", "10s", "./runperm.sh", filename])
-        fname = "./out/fuzz_trace_best"
+        subprocess.call(["timeout", "10s", "./runperm.sh", filename, testcaseDir])
+        fname = "./work/baseline/out/fuzz_trace_best"
         if(os.path.isfile(fname)):
             currPool.add(func)
             weGood = True
@@ -719,19 +732,25 @@ def mainLoop():
  
     if weGood:
         while True:
-        #while True:
+            #while True:
             #stdioPrint(currPool)
             currPermutation = list(currPool)
             shuffle(currPermutation)
             #stdioPrint(currPermutation)
-            filename = "./testcase"+ str(caseIndex)
-            funcWritten =0 
-            current = open(filename, 'w+') 
+            filename = "testcase"+ str(caseIndex)
+            testcaseDir = "./work/" + filename
+            seedFile = "./work/" + filename + "/in/1"
+            filename = "./work/" + filename +"/" +filename
+            subprocess.call(["timeout", "10s", "./setupHarness.sh", testcaseDir])
+            funcWritten =0
+            current = open(filename, 'w+')
+            seedTestcase = open(seedFile, 'wb+')
             for func in currPermutation:
                 writeFunctionWrapper(func)
                 scPrint(check)
                 current.flush()
-            subprocess.call(["timeout", "10s", "./runperm.sh", filename])
+                seedTestcase.flush()
+            subprocess.call(["timeout", "15s", "./runperm.sh", filename, testcaseDir])
             currentScore = getScore()
             if (currentScore == 0):
                 results.write(filename + " might've crashed or hanged \n")
@@ -744,7 +763,7 @@ def mainLoop():
             if (currentScore > bestScore):
                 bestScore = currentScore
                 bestIndex = caseIndex
-                results.write("Top score updated" + str(bestScore))
+                results.write(str(time.time()- startTime)+": " + str(bestScore) + "\n")
             caseIndex += 1
             #Probabilty to increase the pool size
             if (decision(0.9)):
@@ -998,6 +1017,7 @@ def symExec(enclave):
 
 def main(argv):
    global current
+   global results
    global parseTimeStart 
    global parseModelTime 
    global symExecTime 
@@ -1034,7 +1054,14 @@ def main(argv):
    # We want to handle the signal handling ourselves so we can print out stats in the end
    # TODO: Much better to just dump it in a file 
    signal.signal(signal.SIGINT, signal_handler)
-   scPrint("")
+   #scPrint("")
+   path = "./work"
+   if (os.path.isdir(path)):
+       stdioPrint("Existing work Directory Found, Please cache previous work! \n")
+       quit()
+   os.mkdir(path)
+   current = open("temp","w")
+   results = open("./work/results", "w")
    parseTimeStart = time.time()
    parseEDL(rawDat)
    #stdioPrint(ec)
