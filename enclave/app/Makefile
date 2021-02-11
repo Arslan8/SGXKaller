@@ -183,7 +183,7 @@ clean:
 	@rm -f .config_* $(App_Name) $(App_Cpp_Objects) sabd_enclave_u.* $(App_Name).o app.c
 
 modeld:
-	./parseBridge -i ./bridge.h -m /home/arslan/Documents/LBC/rustc/rust/src/llvm-project/llvm/lib/Transforms/IOSanitizer/dump -e /home/arslan/Documents/LBC/rustc/rust/src/llvm-project/llvm/lib/Transforms/IOSanitizer/endumpf -r ./raw.data -s /home/arslan/sgxsdk2/sgxsdk/SampleCode/pristine/ContactDiscoveryService/enclave/app/enclave.signed.so -t ./bridge_ret.dat
+	rm -rf ./work/ && ./parseBridge -i ./bridge.h -m /home/arslan/Documents/LBC/rustc/rust/src/llvm-project/llvm/lib/Transforms/IOSanitizer/dump -e /home/arslan/Documents/LBC/rustc/rust/src/llvm-project/llvm/lib/Transforms/IOSanitizer/endumpf -r ./raw.data -s /home/arslan/sgxsdk2/sgxsdk/SampleCode/pristine/ContactDiscoveryService/enclave/app/enclave.signed.so -t ./bridge_ret.dat
 
 indentBridge:
 	indent ./bridge.h --line-length185 -brs

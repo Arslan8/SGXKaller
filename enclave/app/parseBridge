@@ -9,6 +9,9 @@ from cStringIO import StringIO
 from IPython import embed
 import time
 import datetime
+from subprocess import Popen
+numFuncs = 0
+doSymExec = False
 startTime =0
 parseTimeStart = 0
 parseModelTime = 0
@@ -196,8 +199,8 @@ def parsePrototype(proto):
     name = name.strip()
     x[name]={}
     x[name]['ret'] = ret
-    #print 'Func Name:' + name
-    #print 'return value:' + x[name]['ret']
+    stdioPrint('Func Name:' + name)
+    stdioPrint('return value:' + x[name]['ret'])
     argsJoined,_ = proto.split(');',1)
     #print 'Func Args:' + x['args']
     args = argsJoined.split(',')
@@ -337,6 +340,7 @@ def stdioPrint(obj):
 def fuzz(snip, func):
     global x
     global seedTestcase
+    global doSymExec
     typeName = snip.split(" ")
     type, id = typeName[:-1],typeName[-1]
     size = id.split('[');
@@ -373,8 +377,32 @@ def fuzz(snip, func):
     #stdioPrint(type)
     if(type in intalias):
         # generate a random int
-        for idx in range(int(arrSize)):
-            val.append(str(random.randint(0, 2147483648)))
+        needLog = False
+        scPrint(snip);
+        ast = snip.split(" ")
+        tid = ast[-1].replace(";","")
+        #embed()
+        l = int(tid.split("_")[-1])
+        snip = ""
+        #embed()
+        if (len(tid.split("_")) ==2 and ("solns" in x[func])):
+            scPrint("temp = (char *)&" + tid + ";")
+            argn = int(tid.split("_")[-1])
+            solns = len(x[func]["args"][argn]) - 3  # type, arrSize and identifier
+            if solns != 0:
+                if solns ==1:
+                    pick = 0
+                else:
+                    pick = randrange(solns -1)
+                BA = x[func]["args"][argn][str(pick)]
+                idx =0
+                scPrint("fgets(temp,"+ str(len(x[func]["args"][argn][str(pick)]))+ ", stdin);")
+                BA = x[func]["args"][argn][str(pick)]
+                for byte in BA:
+                        if doSymExec:
+                            seedTestcase.write(struct.pack('B',byte))
+                        else:
+                            seedTestcase.write(struct.pack('B',0))
     elif("*" in type):
         #scPrint(type)
         pointsto = type.replace("*", "")
@@ -397,10 +425,10 @@ def fuzz(snip, func):
     elif(type == "float" or type == "double"):
         for idx in range(int(arrSize)):
             val.append(str(random.uniform(0, 3.4E+38)))
-    elif (type == "char *" or type == "char*" or type=="const char*" or type=="const char *"):
-        for idx in range(int(arrSize)):
-            length = random.randint(0, 16384);
-            val.append("\"" + randomString(length) +"\"")
+    #elif (type == "char *" or type == "char*" or type=="const char*" or type=="const char *"):
+    #    for idx in range(int(arrSize)):
+    #        length = random.randint(0, 16384);
+    #        val.append("\"" + randomString(length) +"\"")
     elif (type in structs):
         rsnip =[snip] 
         #TODO: Enums could fail if we don't start from zero
@@ -439,7 +467,10 @@ def fuzz(snip, func):
 
                 scPrint("fgets(temp,"+ str(len(x[func]["args"][argn][str(pick)]))+ ", stdin);")
                 for byte in BA:
-                    seedTestcase.write(struct.pack('B',byte))
+                    if doSymExec:
+                        seedTestcase.write(struct.pack('B',byte))
+                    else:
+                        seedTestcase.write(struct.pack('B',0))
                     idx+=1
             else:
                 scPrint("memset(&" + ast[1].replace(";","") +",0,sizeof("+ ast[0]+ "));")
@@ -454,6 +485,9 @@ def fuzz(snip, func):
                 scPrint("temp = (char *)&" + id + ";")
                 argn = int(id.split("_")[-1])
                 solns = x[func]["solns"]
+                #embed()
+                stdioPrint(func)
+                stdioPrint(solns)
                 if solns ==1:
                     pick = 0
                 else:
@@ -463,7 +497,10 @@ def fuzz(snip, func):
                 idx =0
                 scPrint("fgets(temp,"+ str(len(BA))+ ", stdin);")
                 for byte in BA:
-                    seedTestcase.write(struct.pack('B',byte))
+                    if doSymExec:
+                        seedTestcase.write(struct.pack('B',byte))
+                    else:
+                        seedTestcase.write(struct.pack('B',0))
                     idx+=1
 
         else:
@@ -665,6 +702,7 @@ def getScore():
     global totalExecs
     fname = testcaseDir + "/out/fuzz_trace_best"
     stat = testcaseDir + "/out/fuzzer_stats"
+    virginBitsInv = testcaseDir + "/out/blockcoverage"
     numBlocks = 0
     numSet = 0
     blockHit = 0
@@ -685,6 +723,13 @@ def getScore():
                 line = line.rstrip()  # remove '\n' at end of line
                 if "execs_done" in line:
                     totalExecs += int(line.split(":")[-1])
+
+
+        with open(virginBitsInv) as f:
+            for line in f:
+                line = line.rstrip()
+                blockHit = int(line.split(":")[-1])
+
         return blockHit
     else:
         stdioPrint("The testcase failed")
@@ -720,8 +765,10 @@ def mainLoop():
         seedTestcase = open(seedFile, 'wb+')
         writeFunctionWrapper(func)
         scPrint(check)
+        seedTestcase.write(struct.pack('B',0))
         current.flush()
-        subprocess.call(["timeout", "10s", "./runperm.sh", filename, testcaseDir])
+        seedTestcase.flush()
+        subprocess.call(["timeout", "40s", "./runperm.sh", filename, testcaseDir])
         fname = "./work/baseline/out/fuzz_trace_best"
         if(os.path.isfile(fname)):
             currPool.add(func)
@@ -750,7 +797,9 @@ def mainLoop():
                 scPrint(check)
                 current.flush()
                 seedTestcase.flush()
-            subprocess.call(["timeout", "15s", "./runperm.sh", filename, testcaseDir])
+            seedTestcase.write(struct.pack('B',0))
+            seedTestcase.flush()
+            subprocess.call(["timeout", "40s", "./runperm.sh", filename, testcaseDir])
             currentScore = getScore()
             if (currentScore == 0):
                 results.write(filename + " might've crashed or hanged \n")
@@ -770,20 +819,70 @@ def mainLoop():
                 increasePool()
 validElem = []
 def inferModel():
+    global current
+    global startTime
+    global currPool
+    global baselineScore
+    global bestIndex
+    global bestScore
+    global totalScoreSinceMe
+    global totalRunsSinceMe
+    global funcWritten
+    global caseIndex
+    global mainLoopStart
+    global testcaseDir
+    global seedTestcase
     global targetFuncs
     global validElem
+    global numFuncs
     for elem in (list(ec)):
         if (len(ec[elem])):
             validElem.insert(0,elem)
 
     edls = len(validElem)
 
-    while True:
-        edl = random.randint(0, edls- 1)
-        stdioPrint(validElem[edl])
-        targetFuncs = ec[validElem[edl]]
 
-        mainLoop()
+    if (numFuncs > 4):
+        while True:
+            edl = random.randint(0, edls- 1)
+            stdioPrint(validElem[edl])
+            targetFuncs = ec[validElem[edl]]
+            mainLoop()
+    else:
+        #Write all the permuatations, less than 4 we have 24 permutations
+        caseIndex = 0
+        edl = 0
+        while edl < edls:
+            #embed()
+            perms = permutation(list(ec[validElem[edl]]))
+            proc = []
+            #stdioPrint(currPermutation)
+            for currPermutation in perms:
+                filename = "testcase"+ str(caseIndex)
+                testcaseDir = "./work/" + filename
+                seedFile = "./work/" + filename + "/in/1"
+                filename = "./work/" + filename +"/" +filename
+                subprocess.call(["./setupHarnessEx.sh", testcaseDir])
+                funcWritten =0
+                current = open(filename, 'w+')
+                seedTestcase = open(seedFile, 'wb+')
+                for func in currPermutation:
+                    writeFunctionWrapper(func)
+                    scPrint(check)
+                    current.flush()
+                    seedTestcase.flush()
+                seedTestcase.write(struct.pack('B',0))
+                seedTestcase.flush()
+                subprocess.call(["./setupHarnessPost.sh", filename, testcaseDir])
+                proc.append(Popen(["./runperm.sh", filename, testcaseDir]))
+                caseIndex += 1
+            edl += 1
+
+        while True:
+            i =0
+
+
+        
      
 
     stdioPrint(targetFuncs)
@@ -795,7 +894,7 @@ def parseRet(ret):
              funcWithRet.append(line.replace("\n", ""))
              line = fp.readline()
 def _symExec(csm):
-    stepCount = 50
+    stepCount = 100
     while len(csm.active) > 0 and stepCount >0:
         #stdioPrint(csm)
         csm.step()
@@ -853,6 +952,19 @@ def getSolns(arg, csm, func, skipArg):
             stdioPrint(x[func]['args'][0 + skipArg][spath][byte])
             byte +=1
         path += 1
+    if x[func]['solns'] == 0:
+        #IF we aren't able to find anything just memset args
+        x[func]['solns'] = 1
+        arg = getBV(arg)
+        byte =0
+        spath = str(path)
+        x[func]['args'][0 + skipArg][spath] = []
+        for chunk in arg.chop(8):
+            x[func]['args'][0 + skipArg][spath].append(0)
+            stdioPrint(x[func]['args'][0 + skipArg][spath][byte])
+            byte +=1
+        path += 1
+
 
 def symExec(enclave):
     stdioPrint("enclave" + enclave)
@@ -1024,6 +1136,7 @@ def main(argv):
    global parseClusterTime 
    global inferModelTime
    global startTime
+   global numFuncs
    startTime = time.time()
    inputfile = ''
    enclave = ''
@@ -1067,6 +1180,7 @@ def main(argv):
    #stdioPrint(ec)
    parseBridge(inputfile)
    parseRet(ret)
+   stdioPrint(x)
    parseTimeStart = time.time() - parseTimeStart
    stdioPrint(funcWithRet)
    parseModelTime = time.time();
@@ -1079,6 +1193,7 @@ def main(argv):
    symExec(enclave)
    symExecTime = time.time() - symExecTime
    stdioPrint(x)
+   #embed()
    #return
    #stdioPrint(m)
    #stdioPrint(x)
@@ -1091,8 +1206,8 @@ def main(argv):
    # Uncomment the following line if you just want to run symbolic execution 
    #return 
    lx = list(x)
-   numfuncs = len(lx)
-   func = lx[randrange(numfuncs)]
+   numFuncs = len(lx)
+   func = lx[randrange(numFuncs)]
    #stdioPrint(clu)
    #stdioPrint(list(ec))
    writeClusters()
