@@ -842,7 +842,7 @@ def inferModel():
     edls = len(validElem)
 
 
-    if (numFuncs > 4):
+    if (numFuncs > 7):
         while True:
             edl = random.randint(0, edls- 1)
             stdioPrint(validElem[edl])

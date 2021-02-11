@@ -6,4 +6,4 @@ cat $1 > $PWD/temp
 rm ./app
 rm ./app.c
 make app
-./afl-fuzz  -m 50000000 -i $2/in/ -o $2/out/ ./app
+./afl-fuzz  -m 50000000 -i $2/in/ -o $2/out/ $2/app
