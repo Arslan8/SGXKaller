@@ -10,6 +10,7 @@ enclave {
     trusted {
 	include "pthread.h"
 	include "forward_decl.h"
+#define TEST_BUILD
 #ifdef TEST_BUILD
 	public void testFuzzSGX();
 #endif 
